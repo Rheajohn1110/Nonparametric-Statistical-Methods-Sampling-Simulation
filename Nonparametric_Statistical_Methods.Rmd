@@ -1,0 +1,653 @@
+---
+title: 'Module 5: Nonparametric Statistical Methods / Sampling and Simulation'
+author: "Rhea Thoppil, ALY6015 Intermediate Analytics"
+date: "2024-02-10"
+output: html_document
+---
+
+# Introduction:
+
+In this assignment, we have explored a variety of nonparametric statistical methods to test hypotheses and examine relationships within different sets of data. Nonparametric methods are particularly useful when the assumptions necessary for parametric tests are not met, such as when data does not follow a normal distribution or when dealing with ordinal data. We have utilized tests including the Sign Test, Wilcoxon Rank Sum Test, Spearman Rank Correlation Coefficient, and the Kruskal-Wallis Test to conduct our analyses. Through these methods, we have sought to understand underlying distributions, measure correlations, and compare medians across groups.
+
+# ***Section 13-2*** 
+
+## Task 1 (13-2.6) Game Attendance
+
+An athletic director suggests the median number for the paid attendance at 20 local football games is 3000. The data for a random sample are shown. At α = 0.05, is there enough evidence to reject the claim? If you were printing the programs for the games, would you use this figure as a guide?\
+
+| Col1 | Col2 | Col3 | Col4 | Col5 |
+|------|------|------|------|------|
+| 6210 | 3150 | 2700 | 3012 | 4875 |
+| 3540 | 6127 | 2581 | 2642 | 2573 |
+| 2792 | 2800 | 2500 | 3700 | 6030 |
+| 5437 | 2758 | 3490 | 2851 | 2720 |
+
+## Task 1 Solution:
+
+## **Step 1. [State the hypotheses and identify the claim :]{.underline}**
+
+-   Null Hypothesis: The median attendance at local football games is 3000.
+
+-   Alternative Hypothesis: The median attendance at local football games is not 3000.
+
+-   The claim is that the median attendance is 3000.
+
+## Step 2. [**Critical Value:**]{.underline}
+
+```{r}
+alpha <- 0.05
+```
+
+## **Step 3. [Compute the Test Value:]{.underline}**
+
+```{r}
+
+#Creating a vector
+game_attendance <- c(6210, 3150, 2700, 3012, 4875, 3540, 6127, 2581, 2642, 2573,
+                2792, 2800, 2500, 3700, 6030, 5437, 2758, 3490, 2851, 2720)
+
+# Hypothesized median
+median_task1 <- 3000
+
+# Calculating differences from the hypothesized median
+differences_task1 <- game_attendance - median_task1
+
+#Determining the median attendance above 3000
+
+postive_task1 <- length(differences_task1[differences_task1>0])
+
+#Determining the median attendance below 3000
+negative_task1 <- length(differences_task1[differences_task1<0])
+
+# Perform the binomial test
+binom_test_result_task1 <- binom.test(x = c(postive_task1, negative_task1), alternative = "two.sided")
+
+# Print the test result
+print(binom_test_result_task1)
+
+
+
+
+```
+
+## Step 4. [Make the decision]{.underline}
+
+```{r}
+ 
+#Printing the p-value
+
+binom_test_result_task1$p.value
+
+#Determine if we should reject/accept the null hypothesis
+
+ifelse(binom_test_result_task1$p.value>alpha, "fail to reject the null hypothesis","reject the null hypothesis")
+```
+
+## Step 5. [Summary]{.underline}
+
+As the `p-value` turns out to be 1, and is greater than the .05 significance level, **we do not reject the null hypothesis**. At .05 significance level, we do not reject the notion that the median attendance at local football game is 3000.
+
+[**Q. If you were printing the programs for the games, would you use this figure as a guide?**]{.underline}
+
+A\> If we are responsible for printing the programs for the games and need to decide on the number of programs to print based on expected attendance, it would be reasonable to use the figure of 3000 as a guide.
+
+------------------------------------------------------------------------
+
+## Task 2. (13-2.10) Lottery Ticket Sales
+
+A lottery outlet owner hypothesizes that she sells 200 lottery tickets a day. She randomly sampled 40 days and found that on 15 days she sold fewer than 200 tickets.\
+At α = 0.05, is there sufficient evidence to conclude that the median is below 200 tickets?
+
+## [Task 2 Solution:]{.underline}
+
+## **Step 1. [State the hypotheses and identify the claim :]{.underline}**
+
+-   Null Hypothesis: The median number of lottery tickets sold per day is 200.
+
+-   Alternative Hypothesis: The median number of lottery tickets sold per day is less than 200.
+
+-   The claim is that the median number of tickets sold is 200.
+
+## Step 2. [**Critical Value:**]{.underline}
+
+alpha = 0.05
+
+## **Step 3. [Compute the Test Value:]{.underline}**
+
+```{r}
+
+#Number of days sampled
+n_days <- 40
+
+#Number of days with fewer than 200 tickets sold
+n_fewer_200 <- 15
+
+# Perform the binomial test
+binom_test_result_task2 <- binom.test(x = n_fewer_200, n = n_days, p = 0.5, alternative = "less")
+
+# Print the test result
+print(binom_test_result_task2)
+```
+
+##  Step 4. [Make the decision]{.underline}
+
+```{r}
+
+#Printing the p-value
+
+binom_test_result_task2$p.value
+
+#Determine if we should reject/accept the null hypothesis
+
+ifelse(binom_test_result_task2$p.value>alpha, "fail to reject the null hypothesis","reject the null hypothesis")
+```
+
+## Step 5. [Summary]{.underline}
+
+As the `p-value` turns out to be 0.076, and is greater than the .05 significance level, **we do not reject the null hypothesis**. At .05 significance level, we do not reject the notion that the median number of lottery tickets sold per day is 200.
+
+------------------------------------------------------------------------
+
+# *Section 13-3*
+
+## Task 3. (13-3.4) Lengths of Prison Sentences
+
+A random sample of men and women in prison was asked to give the length of sentence each received\
+for a certain type of crime. At α = 0.05, test the claim that there is no difference in the sentence received by each gender. The data (in months) are shown here.
+
+## ![](images/clipboard-3577663642.png)
+
+## Task 3 Solution:
+
+## **Step 1. [State the hypothesis and identify the claim :]{.underline}**
+
+-   Null Hypothesis: The median sentence length for males is equal to the median sentence length for females.
+
+-   Alternative Hypothesis: The median sentence length for males is not equal to the median sentence length for females.
+
+-   The claim is that there is no difference in sentence lengths between genders.
+
+## Step 2. [**Critical Value:**]{.underline}
+
+alpha = 0.05
+
+## **Step 3. [Compute the Test Value:]{.underline}**
+
+```{r}
+# Data for males and females
+males_sentence_lengths <- c(8, 12, 6, 14, 22, 27, 32, 24, 26, 19, 15, 13)
+females_sentence_lengths <- c(7, 5, 2, 3, 21, 26, 30, 9, 4, 17, 23, 12, 11, 16)
+
+#Performing the Wilcoxon rank sum test (Mann-Whitney U test)
+wilcox_test_result_task3 <- wilcox.test(x=males_sentence_lengths,y=females_sentence_lengths, alternative = "two.sided", correct = FALSE)
+
+# Print the test result
+print(wilcox_test_result_task3)
+```
+
+## Step 4. [Make the decision:]{.underline}
+
+```{r}
+
+#Printing the p-value
+
+wilcox_test_result_task3$p.value
+
+#Determine if we should reject/accept the null hypothesis
+
+ifelse(wilcox_test_result_task3$p.value>alpha, "fail to reject the null hypothesis","reject the null hypothesis")
+```
+
+## Step 5. [Summary:]{.underline}
+
+As the `p-value` turns out to be 0.135, and is greater than the .05 significance level, **we do not reject the null hypothesis**. At .05 significance level, we do not reject the notion that the median sentence length for males is equal to the median sentence length for females.
+
+------------------------------------------------------------------------
+
+## Task 4. (13-3.8) Winning Baseball Games 
+
+For the years 1970–1993 the National League (NL) and the American League (AL) (major league baseball) were each divided into two divisions: East and West. Below are random samples of the number of games won by each league’s Eastern Division. At α = 0.05, is there sufficient evidence to conclude a difference in the number of wins?
+
+![](images/clipboard-3608127536.png)
+
+## **Task 4 Solution:**
+
+## **Step 1. [State the hypotheses and identify the claim:]{.underline}**
+
+-   Null Hypothesis : The median number of wins for the NL and AL Eastern Division teams are equal.
+
+-   Alternative Hypothesis: The median number of wins for the NL and AL Eastern Division teams are not equal.
+
+-   The claim is that there is no difference in the number of wins between the two divisions.
+
+## **Step 2. [Critical Value:]{.underline}**
+
+alpha = 0.05
+
+## **Step 3. [Compute the Test Value:]{.underline}**
+
+```{r}
+# Data for NL and AL teams
+nl_wins <- c(89, 96, 88, 101, 90, 91, 92, 96, 108, 100, 95)
+al_wins <- c(108, 86, 91, 97, 100, 102, 95, 104, 95, 89, 88, 101)
+
+# Perform the Wilcoxon rank sum test (Mann-Whitney U test)
+wilcox_test_result_task4 <- wilcox.test(x = nl_wins, y = al_wins, alternative = "two.sided", correct = FALSE)
+
+# Print the test result
+print(wilcox_test_result_task4)
+```
+
+## **Step 4. [Make the decision:]{.underline}**
+
+```{r}
+
+#Printing the p-value
+
+wilcox_test_result_task4$p.value
+
+#Determine if we should reject/accept the null hypothesis
+
+ifelse(wilcox_test_result_task4$p.value>alpha, "fail to reject the null hypothesis","reject the null hypothesis")
+```
+
+## Step 5. [Summary:]{.underline}
+
+As the `p-value` turns out to be 0.665, and is greater than the .05 significance level, **we do not reject the null hypothesis**. At .05 significance level, we do not reject the notion that the median number of wins for the NL and AL Eastern Division teams are equal.
+
+------------------------------------------------------------------------
+
+# *Section 13-4* 
+
+## Task 5. (13-4.A)
+
+Use Table K (or relevant software) to determine whether the null hypothesis should be rejected.\
+• ws = 13, n = 15, α = 0.01, two-tailed\
+• ws = 32, n = 28, α = 0.025, one-tailed\
+• ws = 65, n = 20, α = 0.05, one-tailed\
+• ws = 22, n = 14, α = 0.10, two-tailed
+
+## Task 5 Solution:
+
+## **Step 1. [State the hypothesis and identify the claim:]{.underline}**
+
+-   Null Hypothesis: The population median difference is zero.
+
+-   ​Alternative Hypothesis: The population median difference is greater than (or less than) zero.
+
+## Step 2. [**Critical Value:**]{.underline}
+
+## α = 0.01, two-tailed α = 0.025, one-tailed α = 0.05, one-tailed α = 0.10, two-tailed
+
+## Step 3. [**Compute the Test Value:**]{.underline}
+
+A.
+
+```{r}
+
+#Some of the codes have been sourced from OpenAI, 2024
+# Two-tailed test
+# For n = 15, alpha = 0.01, ws = 13
+n_a <- 15
+alpha_a <- 0.01
+ws_a <- 13
+
+# The critical value for a two-tailed test at alpha level is found by looking at the
+# alpha/2 and 1-(alpha/2) quantiles.
+lower_critical_value_a <- qwilcox(alpha_a / 2, n_a, n_a)
+upper_critical_value_a <- qwilcox(1 - (alpha_a / 2), n_a, n_a)
+
+print(lower_critical_value_a)
+print(upper_critical_value_a)
+
+decision_a <- ifelse(ws_a <= lower_critical_value_a || ws_a >= upper_critical_value_a, "reject the null hypothesis", "fail to reject the null hypothesis")
+decision_a
+```
+
+B.
+
+```{r}
+
+# One-tailed test
+# For n = 28, alpha = 0.025, ws = 32
+n_b <- 28
+alpha_b <- 0.025
+ws_b <- 32
+#The critical value for a one-tailed test at alpha level is found at the alpha quantile.
+critical_value_b <- qwilcox(alpha_b, n_b, n_b)
+print(critical_value_b)
+
+decision_b <- ifelse(ws_b <= critical_value_b, "reject the null hypothesis", "fail to reject the null hypothesis")
+decision_b
+```
+
+C.
+
+```{r}
+
+# One-tailed test (right-tailed)
+# For n = 20, alpha = 0.05, ws = 65
+n_c <- 20
+alpha_c <- 0.05
+ws_c <- 65
+
+#The critical value for a one-tailed test at alpha level is found at the 1 - alpha quantile.
+critical_value_c <- qwilcox(1 - alpha_c, n_c, n_c)
+print(critical_value_c)
+
+#For a right-tailed test, reject the null hypothesis if the test statistic is greater than the critical value.
+decision_c <- ifelse(ws_c >= critical_value_c, "reject the null hypothesis", "fail to reject the null hypothesis")
+decision_c
+```
+
+D.
+
+```{r}
+
+# Two-tailed test
+# For ws = 22, n = 14, α = 0.10,
+n_d <- 14
+alpha_d <- 0.10
+ws_d <- 22
+
+# The critical value for a two-tailed test at alpha level is found by looking at the
+# alpha/2 and 1-(alpha/2) quantiles.
+lower_critical_value_d <- qwilcox(alpha_d / 2, n_d, n_d)
+upper_critical_value_d <- qwilcox(1 - (alpha_d / 2), n_d, n_d)
+
+print(lower_critical_value_d)
+print(upper_critical_value_d)
+
+decision_d <- ifelse(ws_d <= lower_critical_value_d || ws_d >= upper_critical_value_d, "reject the null hypothesis", "fail to reject the null hypothesis")
+decision_d
+```
+
+## Step 4. [Make the decision:]{.underline}
+
+```{r}
+
+#1
+decision_a <- ifelse(ws_a <= lower_critical_value_a || ws_a >= upper_critical_value_a, "reject the null hypothesis", "fail to reject the null hypothesis")
+decision_a
+
+#2
+decision_b <- ifelse(ws_b <= critical_value_b, "reject the null hypothesis", "fail to reject the null hypothesis")
+decision_b
+
+#3
+decision_c <- ifelse(ws_c >= critical_value_c, "reject the null hypothesis", "fail to reject the null hypothesis")
+decision_c
+
+#4
+decision_d <- ifelse(ws_d <= lower_critical_value_d || ws_d >= upper_critical_value_d, "reject the null hypothesis", "fail to reject the null hypothesis")
+decision_d
+
+```
+
+------------------------------------------------------------------------
+
+# *Section 13-5*
+
+## Task 6. (13-5.2) Mathematics Literacy Scores
+
+Through the Organization for Economic Cooperation and Development (OECD), 15-year-olds are tested\
+in member countries in mathematics, reading, and science literacy. Listed are randomly selected total\
+mathematics literacy scores (i.e., both genders) for selected countries in different parts of the world.\
+Test, using the Kruskal-Wallis test, to see if there is a difference in means at α = 0.05.
+
+![](images/clipboard-3563038542.png)
+
+## Task 6 Solution:
+
+## **Step 1. [State the hypothesis and identify the claim:]{.underline}**
+
+-   Null Hypothesis: There are no differences in the mean ranks of mathematics literacy scores across the three regions.
+
+-   Alternative Hypothesis: At least one region has a different mean rank of mathematics literacy scores compared to the others.
+
+-   The claim is that there is no difference in means across the regions.
+
+## **Step 2. [Critical Value:]{.underline}**
+
+-   alpha = 0.05
+
+## **Step 3. [Compute the Test Value:]{.underline}**
+
+The Kruskal-Wallis test statistic (H) is computed based on the ranks of the data across all groups.
+
+```{r}
+# Data for the three regions
+western_hemisphere_scores <- c(527, 406, 474, 381, 411)
+europe_scores <- c(520, 510, 513, 548, 496)
+eastern_asia_scores <- c(523, 547, 547, 391, 549)
+
+# Perform the Kruskal-Wallis test
+kruskal_test_result_task5 <- kruskal.test(list(western_hemisphere_scores, europe_scores, eastern_asia_scores))
+
+kruskal_test_result_task5
+```
+
+## **Step 4. [Make the decision:]{.underline}**
+
+```{r}
+
+#Printing the p-value
+kruskal_test_result_task5$p.value
+
+#Determine if we should reject/accept the null hypothesis
+
+ifelse(kruskal_test_result_task5$p.value>alpha, "fail to reject the null hypothesis","reject the null hypothesis")
+
+```
+
+## Step 5. [Summary:]{.underline}
+
+As the `p-value` turns out to be 0.124, and is greater than the .05 significance level, **we do not reject the null hypothesis**. At .05 significance level, we do not reject the notion that no differences in the mean ranks of mathematics literacy scores across the three regions.
+
+------------------------------------------------------------------------
+
+# *Section 13-6*
+
+## Task 7 13-6.6 Subway and Commuter Rail Passengers 
+
+Six cities are randomly selected, and the number of daily passenger trips (in thousands) for subways\
+and commuter rail service is obtained. At α = 0.05, is there a relationship between the variables?\
+Suggest one reason why the transportation authority might use the results of this study.
+
+![](images/clipboard-727966090.png)
+
+## Task 7 Solution:
+
+## Step 1. [Find the Spearman rank correlation coefficient:]{.underline}
+
+```{r}
+
+# Data for subways and commuter rails in the six cities
+subway_trips <- c(845, 494, 425, 313, 108, 41)
+rail_trips <- c(39, 291, 142, 103, 33, 38)
+
+# Find the Spearman rank correlation coefficient.
+rho <- cor(subway_trips, rail_trips, method = "spearman")
+
+rho
+```
+
+## Step 2. [State the hypothesis:]{.underline}
+
+-   Null Hypothesis : There is no correlation between the number of daily passenger trips for subways and commuter rail service.
+
+-   Alternative Hypothesis : There is a correlation between the number of daily passenger trips for subways and commuter rail service.
+
+## Step 3. [Find the critical value:]{.underline}
+
+```{r}
+# Number of pairs
+n_6 <- 6
+
+# Significance level
+alpha <- 0.05
+
+# Two-tailed test multiplier for the normal distribution
+z <- qnorm(1 - alpha / 2)
+
+# Compute the critical value for Spearman's rank correlation using the normal approximation
+spearman_critical_value <- z * (1 / sqrt(n_6 - 1))
+
+# Print the critical value
+spearman_critical_value
+```
+
+## Step 4. [Make the decision:]{.underline}
+
+```{r}
+
+decision_task7 <- ifelse(abs(rho) > spearman_critical_value, "Reject the null hypothesis", "Fail to Reject the null hypothesis")
+
+# Print the decision and the value of rho
+decision_task7
+rho
+```
+
+## Step 5. [Summary:]{.underline}
+
+As the rho turns out to be 0.6, and is less than the .0876 critical level, **we do not reject the null hypothesis**. We do not reject the notion that there is significant correlation between the number of daily passenger trips for subways and commuter rail service in the six cities.
+
+[**Q. Suggest one reason why the transportation authority might use the results of this study?**]{.underline}
+
+A\> The transportation authority might use the results of this study to inform their planning and resource allocation. Since the Spearman rank correlation coefficient of 0.6 suggests a positive but not statistically significant correlation between the number of daily passenger trips for subways and commuter rail service, the authority might conclude that while there is some relationship between the usage of the two services, it is not strong enough to warrant combining or integrating services based on current data.
+
+One reason for using these results could be to evaluate whether efforts to promote one service (e.g., subways) might have a spillover effect on the usage of the other service (e.g., commuter rail). The absence of a strong correlation might lead to independent strategies for improving each service without the expectation that changes in one will necessarily affect the other. Alternatively, the results could also be used to identify potential for cross-promotion or joint ticketing if the authority was expecting a stronger relationship and the study prompts a reevaluation of their approach.
+
+------------------------------------------------------------------------
+
+# *Section 14-3*
+
+## Task 8 14-3.16 Prizes in Caramel Corn Boxes
+
+A caramel corn company gives four different prizes, one in each box. They are placed in the boxes at\
+random. Find the average number of boxes a person needs to buy to get all four prizes. (40)
+
+## Task 8 Solution:
+
+## **Step 1: Simulate a single experiment.**
+
+-   We'll generate random numbers between 1 and 4, each representing a prize, and count how many boxes we need to buy until we have collected all four different prizes.
+
+## **Step 2: Repeat the experiment.**
+
+-   We'll repeat step 1 for 40 times to simulate 40 different trials.
+
+```{r}
+
+#below code is sourced from OpenAI,2024
+
+set.seed(123) # Setting a seed for reproducibility
+
+# Function to simulate one trial of buying boxes until all four prizes are collected
+simulate_one_trial <- function() {
+  prizes_collected <- numeric() # Vector to store collected prizes
+  num_boxes <- 0 # Counter for the number of boxes bought
+  
+  # Repeat buying boxes until all four unique prizes are collected
+  while(length(unique(prizes_collected)) < 4) {
+    prize <- sample(1:4, 1) # Get a random prize (numbered 1 to 4)
+    prizes_collected <- c(prizes_collected, prize) # Add the prize to the collection
+    num_boxes <- num_boxes + 1 # Increment the box counter
+  }
+  
+  return(num_boxes) # Return the total number of boxes bought in this trial
+}
+
+# Step 2: Repeat the experiment 40 times
+num_trials <- 40
+results_task8 <- replicate(num_trials, simulate_one_trial())
+
+# Step 3: Calculate the average number of boxes needed
+average_boxes <- mean(results_task8)
+
+# Print the average
+average_boxes
+```
+
+## Step 3. Summary
+
+The output indicates that, on average, approximately 7.975 (or about 8) boxes of caramel corn need to be purchased to collect all four unique prizes. This average is based on a simulation of the experiment conducted 40 times. Each simulation represents a sequence of purchases where a single box is bought at a time until a complete set of all four prizes is obtained.
+
+------------------------------------------------------------------------
+
+## Task 9 14-3.18 Lottery Winner
+
+To win a certain lotto, a person must spell the word big. Sixty percent of the tickets contain the letter b,\
+30% contain the letter i, and 10% contain the letter g. Find the average number of tickets a person must\
+buy to win the prize. (30).
+
+## Task 9 Solution
+
+## **Step 1: Simulate a single experiment.**
+
+-   Use random sampling to represent buying tickets, taking into account the different probabilities of getting each letter (60% for B, 30% for I, and 10% for G), and count the number of tickets bought until all three letters are collected.
+
+## **Step 2: Repeat the experiment.**
+
+-   Repeat step 1 for 30 times to simulate 30 different trials.
+
+```{r}
+set.seed(123) # Setting a seed for reproducibility
+
+# Function to simulate one trial of buying tickets until all three letters are collected
+simulate_one_trial_1 <- function() {
+  letters_collected<- character() # Vector to store collected letters
+  num_tickets <- 0 # Counter for the number of tickets bought
+  
+  # Define the probabilities for each letter
+  letters <- c("b", "i", "g")
+  probabilities <- c(0.6, 0.3, 0.1)
+  
+  # Repeat buying tickets until all three unique letters are collected
+  while(length(unique(letters_collected)) < 3) {
+    letter <- sample(letters, 1, prob = probabilities) # Get a random letter based on the probabilities
+    letters_collected <- c(letters_collected, letter) # Add the letter to the collection
+    num_tickets <- num_tickets + 1 # Increment the ticket counter
+  }
+  
+  return(num_tickets) # Return the total number of tickets bought in this trial
+}
+
+# Step 2: Repeat the experiment 30 times
+num_trials <- 30
+results_task9 <- replicate(num_trials, simulate_one_trial())
+
+# Step 3: Calculate the average number of tickets needed
+average_tickets <- mean(results_task9)
+
+# Print the average
+average_tickets
+```
+
+## Step 3. Summary
+
+The output shows that, based on a simulation run 30 times, a person needs to buy an average of approximately 7.5333 tickets to spell the word "big" by collecting the letters B, I, and G. The simulation assumes that each ticket purchased has a 60% chance of containing the letter B, a 30% chance of containing the letter I, and a 10% chance of containing the letter G.
+
+------------------------------------------------------------------------
+
+# Conclusion:
+
+Upon completing the assignment, we have gained insights into the application and interpretation of nonparametric tests in various scenarios. The results from our analyses provided evidence to either reject or fail to reject our null hypotheses, allowing us to draw conclusions about the populations from which our samples were drawn.
+
+------------------------------------------------------------------------
+
+# References:
+
+1.  OpenAI, 2024. *chat.openai*
+
+    <https://chat.openai.com/>
+
+2.  Shapiro, V. *ALY6015_Module5_R_Tutorials_WinterA_2024* [.Rmd file].
+
+3.  Pre-Assignment Lab: Non-Parametric Statistics Video . *northeastern.instructure.com.*
+
+    <https://northeastern.instructure.com/courses/164824/assignments/2129240>
+
+4.  Chi Yau. *Non-parametric Methods.* www.r-tutor.com/el
+
+    <https://www.r-tutor.com/elementary-statistics/non-parametric-methods>
